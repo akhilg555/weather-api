@@ -1,0 +1,20 @@
+{
+    "weather": {
+        "main": "Drizzle",
+        "description": "light intensity drizzle"
+    },
+    "places": [
+        {
+          "name": "adxs",
+          "description":"ads"
+ 		}
+    ],
+    "flights":
+    [
+       {
+        "Type": "AIRPORT",
+        "name": "HEATHROW",
+        "detailedName": "LONDON/GB:HEATHROW"
+        }
+    ]
+}

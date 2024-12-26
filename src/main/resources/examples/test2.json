@@ -1,0 +1,12 @@
+{
+    "weather": {
+        "main": "Drizzle",
+        "description": "light intensity drizzle"
+    },
+    "places": [
+        {
+          "name": "adxs",
+          "description":"ads"
+ 		}
+    ]
+}

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8d16f5f3-4874-41a8-8eb5-41c36f80eb48" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e65c3769-8ed3-4966-ab5d-004004759f2d"/>
+	<oauth:token-manager-config name="Token_manager_config" doc:name="Token manager config" doc:id="f3bdab8b-c9d3-44ba-87b4-179e10d543e1" />
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="85f3a3a2-9d96-4c61-998a-a1a24f50afe9" />
+	<http:request-config name="HTTP_Request_configuration_oauth" doc:name="HTTP Request configuration" doc:id="d90a7503-d366-4958-ba1a-977d87e3a435">
+		<http:request-connection protocol="HTTPS" host="test.api.amadeus.com">
+			<http:authentication >
+				<oauth:client-credentials-grant-type clientId="GK0CRIEajGZ0kUlxaBxESsSTQ8qvXbJ7" clientSecret="0Y6eoGToATeQJPTl" tokenUrl="https://test.api.amadeus.com/v1/security/oauth2/token" />
+			</http:authentication>
+		</http:request-connection>
+	</http:request-config>
+	<!-- [STUDIO:"weather-apiFlow"]<flow name="weather-apiFlow" doc:id="e4a19cee-7495-408f-8994-f8d8df1e0b48" >
+		<http:listener doc:name="Listener" doc:id="27ee88fa-1650-4c53-baa6-6f1ff85407b7" config-ref="HTTP_Listener_config" path="weather" allowedMethods="GET"/>
+		<set-variable value="#[attributes.queryParams.city&#93;" doc:name="Set Variable" doc:id="382b7130-ab31-4057-8104-422c208b4bd9" variableName="city"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="52ac252b-9dc4-49e4-ac34-00f646373fdd" maxConcurrency="1">
+			<route >
+				<http:request method="GET" doc:name="Request" doc:id="d7153a0f-9bea-45cb-a10c-6a1a9508d488" config-ref="HTTP_Request_configuration" url="https://api.openweathermap.org/data/2.5/weather" target="pay">
+			<http:query-params><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	q : vars.city,
+	unit : 'metric',
+	appid : '051e2c1cfc84085fc13c91075e40365d'
+}&#93;&#93;&#93;></http:query-params>
+		</http:request>
+				<set-variable value="#[vars.pay.coord.lat&#93;" doc:name="Set Variable" doc:id="a38466a2-30ec-42ad-ad45-48660db79061" variableName="lat"/>
+				<set-variable value="#[vars.pay.coord.lon&#93;" doc:name="Set Variable" doc:id="62bbb861-0f42-46d0-aa52-01099dcc83d9" variableName="lon"/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="88b73533-571a-40b7-99a7-e3adfc391cb3" message='#["value in second branch"++ vars.pay&#93;'/>
+				<http:request method="GET" doc:name="Request" doc:id="91d53b8f-a0d0-4dbb-85af-5790eb7105fe" url="https://test.api.amadeus.com/v1/reference-data/locations/airports">
+					<http:headers><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	"Authorization" : "Bearer yPRGhjJeQNA5FxgeFeI2vWA56keP"
+}&#93;&#93;&#93;></http:headers>
+					<http:query-params><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	"longitude" : "-0.44161",
+	"latitude" : "51.57285"
+}&#93;&#93;&#93;></http:query-params>
+				</http:request>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="8d18a9ec-2347-4f3a-9242-8ba27e16df09" message="#[vars.lat&#93;" />
+				<http:request method="GET" doc:name="Request" doc:id="40e426c9-4a2a-4aab-8a9d-db8c1200c2cf" config-ref="HTTP_Request_configuration" url="https://test.api.amadeus.com/v1/shopping/activities">
+					<http:headers><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	"Authorization" : "Bearer 2n4FNGbJ145w3TGG7FZqMypWsqkz"
+}&#93;&#93;&#93;></http:headers>
+					<http:query-params><![CDATA[#[output application/java
+&#45;&#45;-
+{
+	"longitude" : "-0.44161",
+	"radius" : "50",
+	"latitude" : "51.57285"
+}&#93;&#93;&#93;></http:query-params>
+				</http:request>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="0137bcb1-59ea-4cae-8358-75d31481e4e7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a7dd9461-fbe7-4c2b-b46e-c25a42ddc0c1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	weather: {
+		main: payload."0".payload.weather.main,
+		description: payload."0".payload.weather.description
+	},
+	places: payload."2".payload.data map ( datum , indexOfDatum ) -> {
+		name: datum.name,
+		description: datum.description
+	},
+	flights: payload."1".payload.data map ( datum , indexOfDatum ) -> {
+		name: datum.name,
+		detailedName: datum.detailedName
+	}
+}&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3b837a81-218f-4f8f-bb11-396dc4480061" message="#[payload&#93;"/>
+	</flow> [STUDIO] -->
+	<flow name="weather-apiFlow1" doc:id="abcf5cfb-c2b0-4699-ab39-9c5920153121" >
+		<scheduler doc:name="Scheduler" doc:id="afb34576-6b0f-43f0-913f-cccddbffb681" >
+			<scheduling-strategy >
+				<cron expression="0 0 0 ? * * 2026"/>
+			</scheduling-strategy>
+		</scheduler>
+		<http:request method="GET" doc:name="Request" doc:id="7ea3d615-9559-4b77-a31f-100f5503ab46" config-ref="HTTP_Request_configuration_oauth" path="/v1/reference-data/locations/airports" outputMimeType="application/json">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"longitude" : "-0.44161",
+	"latitude" : "51.57285"
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="5fc82c4e-e3f6-4873-9ffd-9c725d95476e" message="#[payload]"/>
+	</flow>
+</mule>
